@@ -1,7 +1,7 @@
 package mods.railcraft.common.blocks.machine.epsilon;
 
 import cofh.api.energy.IEnergyHandler;
-import mods.railcraft.api.electricity.IElectricGrid;
+import mods.railcraft.api.electricity.IElectricGridObject;
 import mods.railcraft.common.blocks.RailcraftBlocks;
 import mods.railcraft.common.blocks.machine.IEnumMachine;
 import mods.railcraft.common.blocks.machine.MultiBlockPattern;
@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TileFluxTransformer extends TileMultiBlock implements IElectricGrid, IEnergyHandler {
+public class TileFluxTransformer extends TileMultiBlock implements IElectricGridObject, IEnergyHandler {
 
     public static void placeFluxTransformer(World world, int x, int y, int z) {
         for (MultiBlockPattern pattern : TileFluxTransformer.patterns) {

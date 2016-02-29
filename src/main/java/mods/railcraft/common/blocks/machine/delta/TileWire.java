@@ -9,7 +9,7 @@
 package mods.railcraft.common.blocks.machine.delta;
 
 import mods.railcraft.api.core.IPostConnection;
-import mods.railcraft.api.electricity.IElectricGrid;
+import mods.railcraft.api.electricity.IElectricGridObject;
 import mods.railcraft.common.blocks.frame.BlockFrame;
 import mods.railcraft.common.blocks.machine.BoundingBoxManager;
 import mods.railcraft.common.blocks.machine.BoundingBoxManager.ReducedBoundingBox;
@@ -34,7 +34,7 @@ import java.util.ArrayList;
 /**
  * @author CovertJaguar <http://www.railcraft.info>
  */
-public class TileWire extends TileMachineBase implements IElectricGrid {
+public class TileWire extends TileMachineBase implements IElectricGridObject {
 
     public enum AddonType {
 

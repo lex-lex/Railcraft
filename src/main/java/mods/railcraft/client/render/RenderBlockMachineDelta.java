@@ -9,8 +9,8 @@
 package mods.railcraft.client.render;
 
 import mods.railcraft.api.electricity.GridTools;
-import mods.railcraft.api.electricity.IElectricGrid;
-import mods.railcraft.api.electricity.IElectricGrid.ChargeHandler.ConnectType;
+import mods.railcraft.api.electricity.IElectricGridObject;
+import mods.railcraft.api.electricity.IElectricGridObject.ChargeHandler.ConnectType;
 import mods.railcraft.common.blocks.RailcraftBlocks;
 import mods.railcraft.common.blocks.frame.BlockFrame;
 import mods.railcraft.common.blocks.machine.delta.EnumMachineDelta;
@@ -73,14 +73,14 @@ public class RenderBlockMachineDelta extends BlockRenderer {
 
             for (EnumFacing dir : search) {
                 TileEntity tile = WorldPlugin.getTileEntityOnSide(world, x, y, z, dir);
-                if (tile instanceof IElectricGrid && ((IElectricGrid) tile).getChargeHandler().getType() == ConnectType.BLOCK)
+                if (tile instanceof IElectricGridObject && ((IElectricGridObject) tile).getChargeHandler().getType() == ConnectType.BLOCK)
                     plugCons.add(dir);
             }
 
             wireCons.addAll(plugCons);
 
             boolean powered = false;
-            IElectricGrid above = GridTools.getGridObjectAt(world, x, y + 1, z);
+            IElectricGridObject above = GridTools.getGridObjectAt(world, x, y + 1, z);
             if (above != null && TrackTools.isRailBlockAt(world, x, y + 1, z)) {
                 wireCons.add(EnumFacing.UP);
                 plugCons.add(EnumFacing.UP);

@@ -9,7 +9,7 @@
 package mods.railcraft.common.items;
 
 import mods.railcraft.api.electricity.GridTools;
-import mods.railcraft.api.electricity.IElectricGrid;
+import mods.railcraft.api.electricity.IElectricGridObject;
 import mods.railcraft.api.electricity.IElectricMinecart;
 import mods.railcraft.common.core.Railcraft;
 import mods.railcraft.common.core.RailcraftConfig;
@@ -107,16 +107,16 @@ public class ItemElectricMeter extends ItemRailcraft implements IActivationBlock
             return false;
         boolean returnValue = false;
         try {
-            IElectricGrid gridObject = GridTools.getGridObjectAt(world, x, y, z);
+            IElectricGridObject gridObject = GridTools.getGridObjectAt(world, x, y, z);
             if (gridObject != null) {
-                IElectricGrid.ChargeHandler ch = gridObject.getChargeHandler();
+                IElectricGridObject.ChargeHandler ch = gridObject.getChargeHandler();
                 if (ch != null) {
                     ChatPlugin.sendLocalizedChat(player, "railcraft.gui.electric.meter.charge", ch.getCharge(), ch.getDraw(), ch.getLosses());
                     returnValue = true;
                 }
             }
         } catch (Throwable er) {
-            Game.logErrorAPI(Railcraft.MOD_ID, er, IElectricGrid.class);
+            Game.logErrorAPI(Railcraft.MOD_ID, er, IElectricGridObject.class);
             ChatPlugin.sendLocalizedChatFromServer(player, "chat.railcraft.api.error");
         }
         return returnValue;

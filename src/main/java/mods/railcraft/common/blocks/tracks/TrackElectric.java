@@ -8,11 +8,11 @@
  */
 package mods.railcraft.common.blocks.tracks;
 
-import mods.railcraft.api.electricity.IElectricGrid;
+import mods.railcraft.api.electricity.IElectricGridObject;
 import net.minecraft.nbt.NBTTagCompound;
 
 
-public class TrackElectric extends TrackBaseRailcraft implements IElectricGrid {
+public class TrackElectric extends TrackBaseRailcraft implements IElectricGridObject {
 
     private final ChargeHandler chargeHandler = new ChargeHandler(this, ChargeHandler.ConnectType.TRACK);
 

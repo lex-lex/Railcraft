@@ -8,7 +8,7 @@
  */
 package mods.railcraft.common.blocks.machine.epsilon;
 
-import mods.railcraft.api.electricity.IElectricGrid;
+import mods.railcraft.api.electricity.IElectricGridObject;
 import mods.railcraft.api.tracks.ITrackInstance;
 import mods.railcraft.api.tracks.ITrackLockdown;
 import mods.railcraft.common.blocks.RailcraftBlocks;
@@ -34,7 +34,7 @@ import java.io.IOException;
 /**
  * @author CovertJaguar <http://www.railcraft.info>
  */
-public class TileForceTrackEmitter extends TileMachineBase implements IElectricGrid {
+public class TileForceTrackEmitter extends TileMachineBase implements IElectricGridObject {
 
     private static final double BASE_DRAW = 22;
     private static final double CHARGE_PER_TRACK = 2;

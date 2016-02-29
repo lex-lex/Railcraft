@@ -10,7 +10,7 @@ package mods.railcraft.common.blocks.tracks;
 
 import mods.railcraft.api.core.IPostConnection;
 import mods.railcraft.api.core.ITextureLoader;
-import mods.railcraft.api.electricity.IElectricGrid;
+import mods.railcraft.api.electricity.IElectricGridObject;
 import mods.railcraft.api.tracks.*;
 import mods.railcraft.client.particles.ParticleHelper;
 import mods.railcraft.common.blocks.RailcraftBlocks;
@@ -212,10 +212,10 @@ public class BlockTrack extends BlockRailBase implements IPostConnection {
             return;
 
         ITrackInstance track = ((TileTrack) tile).getTrackInstance();
-        if (!(track instanceof IElectricGrid))
+        if (!(track instanceof IElectricGridObject))
             return;
 
-        IElectricGrid.ChargeHandler chargeHandler = ((IElectricGrid) track).getChargeHandler();
+        IElectricGridObject.ChargeHandler chargeHandler = ((IElectricGridObject) track).getChargeHandler();
         if (chargeHandler.getCharge() > 2000)
             if (entity instanceof EntityPlayer && ItemOveralls.isPlayerWearing((EntityPlayer) entity)) {
                 if (!((EntityPlayer) entity).capabilities.isCreativeMode && MiscTools.RANDOM.nextInt(150) == 0) {

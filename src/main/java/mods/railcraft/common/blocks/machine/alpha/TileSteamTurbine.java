@@ -8,7 +8,7 @@
  */
 package mods.railcraft.common.blocks.machine.alpha;
 
-import mods.railcraft.api.electricity.IElectricGrid;
+import mods.railcraft.api.electricity.IElectricGridObject;
 import mods.railcraft.common.blocks.machine.IEnumMachine;
 import mods.railcraft.common.blocks.machine.MultiBlockPattern;
 import mods.railcraft.common.blocks.machine.TileMultiBlock;
@@ -46,7 +46,7 @@ import java.util.List;
 /**
  * @author CovertJaguar <http://www.railcraft.info>
  */
-public class TileSteamTurbine extends TileMultiBlock implements IMultiEmitterDelegate, IFluidHandler, INeedsMaintenance, ISteamUser, IElectricGrid {
+public class TileSteamTurbine extends TileMultiBlock implements IMultiEmitterDelegate, IFluidHandler, INeedsMaintenance, ISteamUser, IElectricGridObject {
 
     enum Texture {
 
