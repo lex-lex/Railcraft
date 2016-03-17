@@ -14,10 +14,11 @@ import mods.railcraft.common.plugins.forge.LocalizationPlugin;
 import mods.railcraft.common.plugins.forge.WorldPlugin;
 import mods.railcraft.common.util.inventory.filters.ArrayStackFilter;
 import mods.railcraft.common.util.inventory.filters.StandardStackFilters;
+import mods.railcraft.common.util.inventory.iterators.IExtInvSlot;
+import mods.railcraft.common.util.inventory.iterators.IInvSlot;
+import mods.railcraft.common.util.inventory.iterators.InventoryIterator;
 import mods.railcraft.common.util.inventory.manipulators.InventoryManipulator;
 import mods.railcraft.common.util.inventory.wrappers.ChestWrapper;
-import mods.railcraft.common.util.inventory.wrappers.IInvSlot;
-import mods.railcraft.common.util.inventory.wrappers.InventoryIterator;
 import mods.railcraft.common.util.inventory.wrappers.SidedInventoryMapper;
 import mods.railcraft.common.util.misc.EnumColor;
 import mods.railcraft.common.util.misc.Game;
@@ -37,10 +38,12 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 @SuppressWarnings({"WeakerAccess", "SameParameterValue"})
@@ -60,15 +63,21 @@ public abstract class InvTools {
         return null;
     }
 
-    @SuppressWarnings("unused")
-    public static List<IInventory> getAdjacentInventories(World world, int i, int j, int k) {
-        return getAdjacentInventories(world, i, j, k, null);
+    public static ItemStack makeSafe(ItemStack stack) {
+        if (stack.stackSize <= 0)
+            return null;
+        return stack;
     }
 
-    public static List<IInventory> getAdjacentInventories(World world, int i, int j, int k, Class<? extends IInventory> type) {
-        List<IInventory> list = new ArrayList<IInventory>(5);
-        for (int side = 0; side < 6; side++) {
-            IInventory inv = getInventoryFromSide(world, i, j, k, EnumFacing.VALUES[side], type, null);
+    @SuppressWarnings("unused")
+    public static List<IInventory> getAdjacentInventories(World world, BlockPos pos) {
+        return getAdjacentInventories(world, pos, null);
+    }
+
+    public static List<IInventory> getAdjacentInventories(World world, BlockPos pos, Class<? extends IInventory> type) {
+        List<IInventory> list = new ArrayList<IInventory>(6);
+        for (EnumFacing side : EnumFacing.VALUES) {
+            IInventory inv = getInventoryFromSide(world, pos, side, type, null);
             if (inv != null)
                 list.add(inv);
         }
@@ -89,8 +98,8 @@ public abstract class InvTools {
 //        return map;
 //    }
 
-    public static IInventory getInventoryFromSide(World world, int x, int y, int z, EnumFacing side, final Class<? extends IInventory> type, final Class<? extends IInventory> exclude) {
-        return getInventoryFromSide(world, x, y, z, side, new ITileFilter() {
+    public static IInventory getInventoryFromSide(World world, BlockPos pos, EnumFacing side, final Class<? extends IInventory> type, final Class<? extends IInventory> exclude) {
+        return getInventoryFromSide(world, pos, side, new ITileFilter() {
             @SuppressWarnings("SimplifiableIfStatement")
             @Override
             public boolean matches(TileEntity tile) {
@@ -101,8 +110,8 @@ public abstract class InvTools {
         });
     }
 
-    public static IInventory getInventoryFromSide(World world, int x, int y, int z, EnumFacing side, ITileFilter filter) {
-        TileEntity tile = WorldPlugin.getTileEntityOnSide(world, x, y, z, side);
+    public static IInventory getInventoryFromSide(World world, BlockPos pos, EnumFacing side, ITileFilter filter) {
+        TileEntity tile = WorldPlugin.getTileEntityOnSide(world, pos, side);
         if (tile == null || !(tile instanceof IInventory) || !filter.matches(tile))
             return null;
         return getInventoryFromTile(tile, side.getOpposite());
@@ -112,7 +121,7 @@ public abstract class InvTools {
         if (tile == null || !(tile instanceof IInventory))
             return null;
 
-//        if (!PipeManager.canExtractItems(null, tile.getWorldObj(), tile.xCoord, tile.yCoord, tile.zCoord))
+//        if (!PipeManager.canExtractItems(null, tile.getWorld(), tile.xCoord, tile.yCoord, tile.zCoord))
 //            return null;
 
         if (tile instanceof TileEntityChest) {
@@ -145,12 +154,12 @@ public abstract class InvTools {
         if (stack == null)
             return null;
         if (isStackEqualToBlock(stack, Blocks.wool))
-            return EnumColor.fromId(15 - stack.getItemDamage());
+            return EnumColor.fromOrdinal(15 - stack.getItemDamage());
         if (stack.getItem() == Items.dye)
-            return EnumColor.fromId(stack.getItemDamage());
+            return EnumColor.fromOrdinal(stack.getItemDamage());
         NBTTagCompound nbt = stack.getTagCompound();
         if (nbt != null && nbt.hasKey("color"))
-            return EnumColor.fromId(nbt.getByte("color"));
+            return EnumColor.fromOrdinal(nbt.getByte("color"));
         return null;
     }
 
@@ -237,38 +246,38 @@ public abstract class InvTools {
         world.spawnEntityInWorld(entityItem);
     }
 
-    public static void dropInventory(IInventory inv, World world, int x, int y, int z) {
+    public static void dropInventory(IInventory inv, World world, BlockPos pos) {
         if (Game.isNotHost(world)) return;
-        for (IInvSlot slot : InventoryIterator.getIterable(inv)) {
-            spewItem(slot.getStackInSlot(), world, x, y, z);
+        for (IExtInvSlot slot : InventoryIterator.getIterable(inv)) {
+            spewItem(slot.getStackInSlot(), world, pos);
             slot.setStackInSlot(null);
         }
     }
 
-    public static void dropItems(Collection<ItemStack> items, World world, int x, int y, int z) {
+    public static void dropItems(Collection<ItemStack> items, World world, BlockPos pos) {
         if (Game.isNotHost(world)) return;
         for (ItemStack stack : items) {
-            spewItem(stack, world, x, y, z);
+            spewItem(stack, world, pos);
         }
     }
 
-    private static void spewItem(ItemStack stack, World world, int x, int y, int z) {
+    private static void spewItem(ItemStack stack, World world, BlockPos pos) {
         if (stack != null) {
-            float xOffset = MiscTools.getRand().nextFloat() * 0.8F + 0.1F;
-            float yOffset = MiscTools.getRand().nextFloat() * 0.8F + 0.1F;
-            float zOffset = MiscTools.getRand().nextFloat() * 0.8F + 0.1F;
+            float xOffset = MiscTools.RANDOM.nextFloat() * 0.8F + 0.1F;
+            float yOffset = MiscTools.RANDOM.nextFloat() * 0.8F + 0.1F;
+            float zOffset = MiscTools.RANDOM.nextFloat() * 0.8F + 0.1F;
             while (stack.stackSize > 0) {
-                int numToDrop = MiscTools.getRand().nextInt(21) + 10;
+                int numToDrop = MiscTools.RANDOM.nextInt(21) + 10;
                 if (numToDrop > stack.stackSize)
                     numToDrop = stack.stackSize;
                 ItemStack newStack = stack.copy();
                 newStack.stackSize = numToDrop;
                 stack.stackSize -= numToDrop;
-                EntityItem entityItem = new EntityItem(world, (float) x + xOffset, (float) y + yOffset, (float) z + zOffset, newStack);
+                EntityItem entityItem = new EntityItem(world, pos.getX() + xOffset, pos.getY() + yOffset, pos.getZ() + zOffset, newStack);
                 float variance = 0.05F;
-                entityItem.motionX = (float) MiscTools.getRand().nextGaussian() * variance;
-                entityItem.motionY = (float) MiscTools.getRand().nextGaussian() * variance + 0.2F;
-                entityItem.motionZ = (float) MiscTools.getRand().nextGaussian() * variance;
+                entityItem.motionX = (float) MiscTools.RANDOM.nextGaussian() * variance;
+                entityItem.motionY = (float) MiscTools.RANDOM.nextGaussian() * variance + 0.2F;
+                entityItem.motionZ = (float) MiscTools.RANDOM.nextGaussian() * variance;
                 world.spawnEntityInWorld(entityItem);
             }
         }
@@ -977,6 +986,7 @@ public abstract class InvTools {
         return !(stack == null || block == null) && stack.getItem() instanceof ItemBlock && ((ItemBlock) stack.getItem()).getBlock() == block;
     }
 
+    @Nullable
     public static Block getBlockFromStack(ItemStack stack) {
         if (stack.getItem() instanceof ItemBlock)
             return ((ItemBlock) stack.getItem()).getBlock();

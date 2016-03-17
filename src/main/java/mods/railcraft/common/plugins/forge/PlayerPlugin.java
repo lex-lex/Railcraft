@@ -13,6 +13,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.S0BPacketAnimation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.UserListOpsEntry;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.FakePlayerFactory;
@@ -22,7 +24,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import java.util.UUID;
 
 /**
- *
  * @author CovertJaguar <http://www.railcraft.info/>
  */
 public class PlayerPlugin {
@@ -55,9 +56,9 @@ public class PlayerPlugin {
     public static String getUsername(World world, GameProfile gameProfile) {
         UUID playerId = gameProfile.getId();
         if (playerId != null) {
-            EntityPlayer player = world.func_152378_a(playerId);
+            EntityPlayer player = world.getPlayerEntityByUUID(playerId);
             if (player != null)
-                return player.getDisplayName();
+                return player.getDisplayNameString();
         }
         String username = gameProfile.getName();
         if (username != null && !username.equals(""))
@@ -65,11 +66,12 @@ public class PlayerPlugin {
         return "[Unknown]";
     }
 
+    @SuppressWarnings("unused")
     public static String getUsername(World world, UUID playerId) {
         if (playerId != null) {
-            EntityPlayer player = world.func_152378_a(playerId);
+            EntityPlayer player = world.getPlayerEntityByUUID(playerId);
             if (player != null)
-                return player.getDisplayName();
+                return player.getDisplayNameString();
         }
         return "[Unknown]";
     }
@@ -79,11 +81,7 @@ public class PlayerPlugin {
     }
 
     public static boolean isOwnerOrOp(GameProfile owner, GameProfile accessor) {
-        if (owner == null || accessor == null)
-            return false;
-        if (owner.equals(accessor))
-            return true;
-        return isPlayerOp(accessor);
+        return !(owner == null || accessor == null) && (owner.equals(accessor) || getPermissionLevel(accessor) > 2);
     }
 
     public static boolean isSamePlayer(GameProfile a, GameProfile b) {
@@ -92,19 +90,24 @@ public class PlayerPlugin {
         return a.getName() != null && a.getName().equals(b.getName());
     }
 
-    public static boolean isPlayerOp(GameProfile player) {
+    public static int getPermissionLevel(GameProfile gameProfile) {
         if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
             throw new RuntimeException("You derped up! Don't call this on the client!");
-        return FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().func_152596_g(player);
+        MinecraftServer mcServer = FMLCommonHandler.instance().getMinecraftServerInstance();
+        if (mcServer.getConfigurationManager().canSendCommands(gameProfile)) {
+            UserListOpsEntry opsEntry = mcServer.getConfigurationManager().getOppedPlayers().getEntry(gameProfile);
+            return opsEntry != null ? opsEntry.getPermissionLevel() : 0;
+        }
+        return 0;
     }
 
     public static boolean isPlayerConnected(GameProfile player) {
-        return FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().func_152612_a(player.getName()) != null;
+        return FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().getPlayerByUsername(player.getName()) != null;
     }
 
     public static void swingItem(EntityPlayer player) {
         player.swingItem();
-        if(player instanceof EntityPlayerMP && ((EntityPlayerMP) player).playerNetServerHandler != null) {
+        if (player instanceof EntityPlayerMP && ((EntityPlayerMP) player).playerNetServerHandler != null) {
             ((EntityPlayerMP) player).playerNetServerHandler.sendPacket(new S0BPacketAnimation(player, 0));
         }
     }

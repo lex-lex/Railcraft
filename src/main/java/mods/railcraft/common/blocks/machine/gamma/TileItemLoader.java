@@ -38,7 +38,7 @@ public class TileItemLoader extends TileLoaderItemBase {
         public boolean matches(TileEntity tile) {
             return !(tile instanceof TileItemLoader);
         }
-    }, InventorySorter.SIZE_DECENDING);
+    }, InventorySorter.SIZE_DESCENDING);
     private final InventoryMapper invBuffer;
     private final LinkedList<IInventory> chests = new LinkedList<IInventory>();
 
@@ -63,8 +63,8 @@ public class TileItemLoader extends TileLoaderItemBase {
     }
 
     @Override
-    public void updateEntity() {
-        super.updateEntity();
+    public void update() {
+        super.update();
 
         if (Game.isNotHost(getWorld())) {
             return;

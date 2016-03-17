@@ -199,7 +199,7 @@ public class TileSteamOven extends TileMultiBlockInventory implements IFluidHand
                                 if (smeltItems()) {
                                     cookTime = 0;
                                     setHasFinishedCycle(true);
-                                    SoundHelper.playSound(worldObj, getPos(), SoundHelper.SOUND_STEAM_BURST, 1, (float) (1 + MiscTools.getRand().nextGaussian() * 0.1));
+                                    SoundHelper.playSound(worldObj, getPos(), SoundHelper.SOUND_STEAM_BURST, 1, (float) (1 + MiscTools.RANDOM.nextGaussian() * 0.1));
                                 }
                         }
                     } else
@@ -254,7 +254,7 @@ public class TileSteamOven extends TileMultiBlockInventory implements IFluidHand
     @Override
     public void onBlockPlacedBy(EntityLivingBase entityliving, ItemStack stack) {
         super.onBlockPlacedBy(entityliving, stack);
-        facing = MiscTools.getHorizontalSideClosestToPlayer(worldObj, getPos(), entityliving);
+        facing = MiscTools.getHorizontalSideFacingPlayer(worldObj, getPos(), entityliving);
     }
 
     @Override

@@ -34,7 +34,6 @@ public class TileBoxController extends TileBoxBase implements IControllerTile, I
     public SignalAspect defaultAspect = SignalAspect.GREEN;
     public SignalAspect poweredAspect = SignalAspect.RED;
     private boolean powered;
-    private boolean prevBlinkState;
 
     @Override
     public EnumSignal getSignalType() {
@@ -50,15 +49,11 @@ public class TileBoxController extends TileBoxBase implements IControllerTile, I
     }
 
     @Override
-    public void updateEntity() {
-        super.updateEntity();
+    public void update() {
+        super.update();
 
         if (Game.isNotHost(worldObj)) {
             controller.tickClient();
-            if (controller.getAspect().isBlinkAspect() && prevBlinkState != SignalAspect.isBlinkOn()) {
-                prevBlinkState = SignalAspect.isBlinkOn();
-                markBlockForUpdate();
-            }
             return;
         }
         controller.tickServer();

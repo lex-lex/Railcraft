@@ -210,7 +210,7 @@ public class TileAnchorWorld extends TileMachineItem implements IAnchor, ISidedI
     }
 
     @Override
-    public ArrayList<ItemStack> getDrops(int fortune) {
+    public  List<ItemStack> getDrops(int fortune) {
         ArrayList<ItemStack> items = new ArrayList<ItemStack>();
         ItemStack drop = getMachineType().getItem();
         if (needsFuel() && hasFuel()) {
@@ -251,7 +251,7 @@ public class TileAnchorWorld extends TileMachineItem implements IAnchor, ISidedI
             prevZ = getZ();
         }
 
-        if (hasActiveTicket() && (refreshTicket || powered))
+        if (hasActiveTicket() && (getTicket().world != worldObj || refreshTicket || powered))
             releaseTicket();
 
         if (needsFuel()) {
@@ -341,9 +341,9 @@ public class TileAnchorWorld extends TileMachineItem implements IAnchor, ISidedI
     }
 
     protected void setTicketData(Ticket chunkTicket) {
-        chunkTicket.getModData().setInteger("xCoord", getX());
-        chunkTicket.getModData().setInteger("yCoord", getY());
-        chunkTicket.getModData().setInteger("zCoord", getZ());
+        chunkTicket.getModData().setInteger("xCoord", getPos().getX());
+        chunkTicket.getModData().setInteger("yCoord", getPos().getY());
+        chunkTicket.getModData().setInteger("zCoord", getPos().getZ());
         chunkTicket.getModData().setString("type", getMachineType().getTag());
     }
 
@@ -360,11 +360,13 @@ public class TileAnchorWorld extends TileMachineItem implements IAnchor, ISidedI
         Ticket ticket = getTicket();
         if (ticket != t) {
             if (ticket != null) {
-                for (ChunkCoordIntPair chunk : ticket.getChunkList()) {
-                    if (ForgeChunkManager.getPersistentChunksFor(worldObj).keys().contains(chunk))
-                        ForgeChunkManager.unforceChunk(ticket, chunk);
+                if (ticket.world == worldObj) {
+                    for (ChunkCoordIntPair chunk : ticket.getChunkList()) {
+                        if (ForgeChunkManager.getPersistentChunksFor(worldObj).keys().contains(chunk))
+                            ForgeChunkManager.unforceChunk(ticket, chunk);
+                    }
+                    ForgeChunkManager.releaseTicket(ticket);
                 }
-                ForgeChunkManager.releaseTicket(ticket);
                 tickets.remove(getUUID());
             }
             changed = true;

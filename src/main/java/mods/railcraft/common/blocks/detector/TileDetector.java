@@ -83,7 +83,7 @@ public class TileDetector extends RailcraftTileEntity implements IGuiReturnHandl
 
         SafeNBTWrapper safe = new SafeNBTWrapper(data);
 
-        direction = EnumFacing.getOrientation(safe.getByte("direction"));
+        direction = EnumFacing.getFront(safe.getByte("direction"));
         powerState = data.getByte("powerState");
         powerDelay = data.getByte("powerDelay");
 
@@ -108,14 +108,14 @@ public class TileDetector extends RailcraftTileEntity implements IGuiReturnHandl
         if (detector == Detector.DUMMY || detector.getType().ordinal() != type)
             setDetector(EnumDetector.fromOrdinal(type));
         powerState = data.readByte();
-        direction = EnumFacing.getOrientation(data.readByte());
+        direction = EnumFacing.getFront(data.readByte());
         detector.readPacketData(data);
         markBlockForUpdate();
     }
 
     @Override
-    public void updateEntity() {
-        super.updateEntity();
+    public void update() {
+        super.update();
         if (Game.isNotHost(getWorld()))
             return;
         if (!tested) {

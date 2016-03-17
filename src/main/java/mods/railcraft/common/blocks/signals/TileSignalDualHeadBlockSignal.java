@@ -33,7 +33,7 @@ public class TileSignalDualHeadBlockSignal extends TileSignalBlockSignal impleme
 
     @Override
     protected boolean isLit() {
-        return getTopAspect().isLit() || getBottomAspect().isLit();
+        return isLit(getTopAspect()) || isLit(getBottomAspect());
     }
 
     @Override
@@ -42,8 +42,8 @@ public class TileSignalDualHeadBlockSignal extends TileSignalBlockSignal impleme
     }
 
     @Override
-    public void updateEntity() {
-        super.updateEntity();
+    public void update() {
+        super.update();
         if (Game.isNotHost(worldObj)) {
             receiver.tickClient();
             return;

@@ -93,7 +93,7 @@ public class ItemLocomotive extends ItemCart {
     }
 
     @Override
-    public void addInformation(ItemStack stack, EntityPlayer player, List info, boolean adv) {
+    public void addInformation(ItemStack stack, EntityPlayer player, List<String> info, boolean adv) {
         GameProfile owner = getOwner(stack);
         if (owner.getName() != null && !owner.getName().equals("[Unknown]")) {
             String format = LocalizationPlugin.translate("railcraft.gui.locomotive.tip.item.owner");
@@ -199,9 +199,9 @@ public class ItemLocomotive extends ItemCart {
             ItemLocomotive item = (ItemLocomotive) stack.getItem();
             if (item.renderType == LocomotiveRenderType.ELECTRIC)
                 return EnumColor.YELLOW;
-            return EnumColor.LIGHT_GRAY;
+            return EnumColor.SILVER;
         }
-        return EnumColor.fromId(nbt.getByte("primaryColor"));
+        return EnumColor.fromOrdinal(nbt.getByte("primaryColor"));
     }
 
     public static EnumColor getSecondaryColor(ItemStack stack) {
@@ -212,7 +212,7 @@ public class ItemLocomotive extends ItemCart {
                 return EnumColor.BLACK;
             return EnumColor.GRAY;
         }
-        return EnumColor.fromId(nbt.getByte("secondaryColor"));
+        return EnumColor.fromOrdinal(nbt.getByte("secondaryColor"));
     }
 
 }

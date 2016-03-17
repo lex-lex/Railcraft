@@ -45,8 +45,8 @@ public class TrackElectric extends TrackBaseRailcraft implements IElectricGridOb
     }
 
     @Override
-    public void updateEntity() {
-        super.updateEntity();
+    public void update() {
+        super.update();
         chargeHandler.tick();
     }
 

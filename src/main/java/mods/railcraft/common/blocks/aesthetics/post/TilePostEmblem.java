@@ -11,6 +11,7 @@ package mods.railcraft.common.blocks.aesthetics.post;
 import mods.railcraft.common.blocks.RailcraftTileEntity;
 import mods.railcraft.common.util.misc.EnumColor;
 import mods.railcraft.common.util.misc.MiscTools;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -29,13 +30,13 @@ public class TilePostEmblem extends RailcraftTileEntity {
     private EnumColor color = null;
 
     @Override
-    public void onBlockPlacedBy(EntityLivingBase entityliving, ItemStack stack) {
-        super.onBlockPlacedBy(entityliving, stack);
-        setFacing(MiscTools.getHorizontalSideClosestToPlayer(worldObj, getPos(), entityliving));
+    public void onBlockPlacedBy(IBlockState state, EntityLivingBase placer, ItemStack stack) {
+        super.onBlockPlacedBy(state, placer, stack);
+        setFacing(MiscTools.getHorizontalSideFacingPlayer(placer));
         NBTTagCompound nbt = stack.getTagCompound();
         if (nbt != null) {
             if (nbt.hasKey("color"))
-                setColor(EnumColor.fromId(nbt.getByte("color")));
+                setColor(EnumColor.fromOrdinal(nbt.getByte("color")));
             if (nbt.hasKey("emblem"))
                 setEmblem(nbt.getString("emblem"));
         }
@@ -95,10 +96,10 @@ public class TilePostEmblem extends RailcraftTileEntity {
     public void readFromNBT(NBTTagCompound data) {
         super.readFromNBT(data);
         emblem = data.getString("emblem");
-        facing = EnumFacing.getOrientation(data.getByte("facing"));
+        facing = EnumFacing.getFront(data.getByte("facing"));
 
         if (data.hasKey("color"))
-            color = EnumColor.fromId(data.getByte("color"));
+            color = EnumColor.fromOrdinal(data.getByte("color"));
     }
 
     @Override
@@ -114,7 +115,7 @@ public class TilePostEmblem extends RailcraftTileEntity {
         super.readPacketData(data);
 
         boolean needsUpdate = false;
-        EnumFacing f = EnumFacing.getOrientation(data.readByte());
+        EnumFacing f = EnumFacing.getFront(data.readByte());
         if (facing != f) {
             facing = f;
             needsUpdate = true;
@@ -127,7 +128,7 @@ public class TilePostEmblem extends RailcraftTileEntity {
                 needsUpdate = true;
             }
         } else {
-            EnumColor c = EnumColor.fromId(cByte);
+            EnumColor c = EnumColor.fromOrdinal(cByte);
             if (color != c) {
                 color = c;
                 needsUpdate = true;

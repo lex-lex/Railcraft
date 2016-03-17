@@ -91,8 +91,8 @@ public class TileTradeStation extends TileMachineItem implements IGuiReturnHandl
     }
 
     @Override
-    public void updateEntity() {
-        super.updateEntity();
+    public void update() {
+        super.update();
 
         if (clock % 256 == 0)
             modifyNearbyAI();
@@ -157,7 +157,7 @@ public class TileTradeStation extends TileMachineItem implements IGuiReturnHandl
     @Override
     public void onBlockPlacedBy(EntityLivingBase entityliving, ItemStack stack) {
         super.onBlockPlacedBy(entityliving, stack);
-        direction = MiscTools.getSideClosestToPlayer(worldObj, xCoord, yCoord, zCoord, entityliving);
+        direction = MiscTools.getSideFacingPlayer(getPos(), entityliving);
     }
 
     @Override

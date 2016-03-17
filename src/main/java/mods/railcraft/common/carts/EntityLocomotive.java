@@ -43,7 +43,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.IFluidHandler;
@@ -81,14 +80,14 @@ public abstract class EntityLocomotive extends CartContainerBase implements IDir
     protected float renderYaw;
     private String model = "";
     private int fuel;
-    private int update = MiscTools.getRand().nextInt();
+    private int update = MiscTools.RANDOM.nextInt();
     private int whistleDelay;
     private int tempIdle;
     private float whistlePitch = getNewWhistlePitch();
 
     public EntityLocomotive(World world) {
         super(world);
-        setPrimaryColor(EnumColor.LIGHT_GRAY.ordinal());
+        setPrimaryColor(EnumColor.SILVER.ordinal());
         setSecondaryColor(EnumColor.GRAY.ordinal());
     }
 

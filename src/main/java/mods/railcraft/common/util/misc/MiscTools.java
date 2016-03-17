@@ -39,15 +39,6 @@ public abstract class MiscTools {
 
     public static final Random RANDOM = new Random();
 
-    /**
-     * Returns a Random instance.
-     *
-     * @return Random
-     */
-    public static Random getRand() {
-        return RANDOM;
-    }
-
     public static void registerTrack(EnumTrack rail) {
         RailcraftBlocks.registerBlockTrack();
         if (RailcraftBlocks.getBlockTrack() != null)
@@ -140,20 +131,20 @@ public abstract class MiscTools {
         Vec3 maxY = start.getIntermediateWithYValue(end, 1);
         Vec3 minZ = start.getIntermediateWithZValue(end, 0);
         Vec3 maxZ = start.getIntermediateWithZValue(end, 1);
-        if (!isVecInsideYZBounds(minX))
+        if (isVecOutsideYZBounds(minX))
             minX = null;
-        if (!isVecInsideYZBounds(maxX))
+        if (isVecOutsideYZBounds(maxX))
             maxX = null;
-        if (!isVecInsideXZBounds(minY))
+        if (isVecOutsideXZBounds(minY))
             minY = null;
-        if (!isVecInsideXZBounds(maxY))
+        if (isVecOutsideXZBounds(maxY))
             maxY = null;
-        if (!isVecInsideXYBounds(minZ))
+        if (isVecOutsideXYBounds(minZ))
             minZ = null;
-        if (!isVecInsideXYBounds(maxZ))
+        if (isVecOutsideXYBounds(maxZ))
             maxZ = null;
         Vec3 closest = null;
-        if (minX != null && (closest == null || start.distanceTo(minX) < start.distanceTo(closest)))
+        if (minX != null)
             closest = minX;
         if (maxX != null && (closest == null || start.distanceTo(maxX) < start.distanceTo(closest)))
             closest = maxX;
@@ -183,25 +174,16 @@ public abstract class MiscTools {
         return new MovingObjectPosition(closest.addVector(pos.getX(), pos.getY(), pos.getZ()), enumfacing, pos);
     }
 
-    private static boolean isVecInsideYZBounds(Vec3 vec3d) {
-        if (vec3d == null)
-            return false;
-        else
-            return vec3d.yCoord >= 0 && vec3d.yCoord <= 1 && vec3d.zCoord >= 0 && vec3d.zCoord <= 1;
+    private static boolean isVecOutsideYZBounds(Vec3 vec3d) {
+        return vec3d == null || vec3d.yCoord < 0 || vec3d.yCoord > 1 || vec3d.zCoord < 0 || vec3d.zCoord > 1;
     }
 
-    private static boolean isVecInsideXZBounds(Vec3 vec3d) {
-        if (vec3d == null)
-            return false;
-        else
-            return vec3d.xCoord >= 0 && vec3d.xCoord <= 1 && vec3d.zCoord >= 0 && vec3d.zCoord <= 1;
+    private static boolean isVecOutsideXZBounds(Vec3 vec3d) {
+        return vec3d == null || vec3d.xCoord < 0 || vec3d.xCoord > 1 || vec3d.zCoord < 0 || vec3d.zCoord > 1;
     }
 
-    private static boolean isVecInsideXYBounds(Vec3 vec3d) {
-        if (vec3d == null)
-            return false;
-        else
-            return vec3d.xCoord >= 0 && vec3d.xCoord <= 1 && vec3d.yCoord >= 0 && vec3d.yCoord <= 1;
+    private static boolean isVecOutsideXYBounds(Vec3 vec3d) {
+        return vec3d == null || vec3d.xCoord < 0 || vec3d.xCoord > 1 || vec3d.yCoord < 0 || vec3d.yCoord > 1;
     }
 
     public static MovingObjectPosition rayTracePlayerLook(EntityPlayer player) {
@@ -231,22 +213,17 @@ public abstract class MiscTools {
      * Returns the side closest to the player. Used in placement logic for
      * blocks.
      *
-     * @param world
-     * @param i
-     * @param j
-     * @param k
-     * @param entityplayer
      * @return a side
      */
-    public static EnumFacing getSideClosestToPlayer(World world, int i, int j, int k, EntityLivingBase entityplayer) {
-        if (MathHelper.abs((float) entityplayer.posX - (float) i) < 2.0F && MathHelper.abs((float) entityplayer.posZ - (float) k) < 2.0F) {
-            double d = (entityplayer.posY + 1.82D) - entityplayer.getYOffset();
-            if (d - (double) j > 2D)
+    public static EnumFacing getSideFacingPlayer(BlockPos pos, EntityLivingBase player) {
+        if (MathHelper.abs((float) player.posX - pos.getX()) < 2.0F && MathHelper.abs((float) player.posZ - pos.getZ()) < 2.0F) {
+            double d = (player.posY + 1.82D) - player.getYOffset();
+            if (d - pos.getY() > 2D)
                 return EnumFacing.UP;
-            if ((double) j - d > 0.0D)
+            if (pos.getY() - d > 0.0D)
                 return EnumFacing.DOWN;
         }
-        int dir = MathHelper.floor_double((double) ((entityplayer.rotationYaw * 4F) / 360F) + 0.5D) & 3;
+        int dir = MathHelper.floor_double((double) ((player.rotationYaw * 4F) / 360F) + 0.5D) & 3;
         switch (dir) {
             case 0:
                 return EnumFacing.NORTH;
@@ -258,26 +235,13 @@ public abstract class MiscTools {
         return dir != 3 ? EnumFacing.DOWN : EnumFacing.WEST;
     }
 
-    public static EnumFacing getSideFacingTrack(World world, int x, int y, int z) {
-        for (EnumFacing dir : EnumFacing.VALUES) {
-            if (TrackTools.isRailBlockAt(world, MiscTools.getXOnSide(x, dir), MiscTools.getYOnSide(y, dir), MiscTools.getZOnSide(z, dir)))
-                return dir;
-        }
-        return null;
-    }
-
     /**
-     * This function unlike getSideClosestToPlayer can only return north, south,
+     * This function unlike getSideFacingPlayer can only return north, south,
      * east, west.
      *
-     * @param world
-     * @param x
-     * @param y
-     * @param z
-     * @param player
      * @return a side
      */
-    public static EnumFacing getHorizontalSideClosestToPlayer(World world, int x, int y, int z, EntityLivingBase player) {
+    public static EnumFacing getHorizontalSideFacingPlayer(EntityLivingBase player) {
         int dir = MathHelper.floor_double((double) ((player.rotationYaw * 4.0F) / 360.0F) + 0.5) & 3;
         switch (dir) {
             case 0:
@@ -292,6 +256,14 @@ public abstract class MiscTools {
         return EnumFacing.NORTH;
     }
 
+    public static EnumFacing getSideFacingTrack(World world, BlockPos pos) {
+        for (EnumFacing dir : EnumFacing.VALUES) {
+            if (TrackTools.isRailBlockAt(world, pos.offset(dir)))
+                return dir;
+        }
+        return null;
+    }
+
     /**
      * @deprecated use {@link EnumFacing#getOpposite()}
      */
@@ -302,28 +274,27 @@ public abstract class MiscTools {
         return EnumFacing.VALUES[s];
     }
 
+    @Deprecated
     public static int getXOnSide(int x, EnumFacing side) {
         return x + side.getFrontOffsetX();
     }
 
+    @Deprecated
     public static int getYOnSide(int y, EnumFacing side) {
         return y + side.getFrontOffsetY();
     }
 
+    @Deprecated
     public static int getZOnSide(int z, EnumFacing side) {
         return z + side.getFrontOffsetZ();
     }
 
-    public static boolean areCoordinatesOnSide(int x, int y, int z, EnumFacing side, int xCoord, int yCoord, int zCoord) {
-        return x + side.getFrontOffsetX() == xCoord && y + side.getFrontOffsetY() == yCoord && z + side.getFrontOffsetZ() == zCoord;
+    public static boolean areCoordinatesOnSide(BlockPos start, BlockPos end, EnumFacing side) {
+        return start.offset(side).equals(end);
     }
 
     public static boolean isKillabledEntity(Entity entity) {
-        if (entity.ridingEntity instanceof EntityMinecart)
-            return false;
-        if (!(entity instanceof EntityLivingBase))
-            return false;
-        return ((EntityLivingBase) entity).getMaxHealth() < 100;
+        return !(entity.ridingEntity instanceof EntityMinecart) && entity instanceof EntityLivingBase && ((EntityLivingBase) entity).getMaxHealth() < 100;
     }
 
 }

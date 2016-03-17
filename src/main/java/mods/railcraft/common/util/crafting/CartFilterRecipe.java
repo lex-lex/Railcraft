@@ -12,8 +12,8 @@ import mods.railcraft.common.carts.EntityCartFiltered;
 import mods.railcraft.common.carts.EnumCart;
 import mods.railcraft.common.carts.ICartType;
 import mods.railcraft.common.fluids.FluidItemHelper;
-import mods.railcraft.common.util.inventory.wrappers.IInvSlot;
-import mods.railcraft.common.util.inventory.wrappers.InventoryIterator;
+import mods.railcraft.common.util.inventory.iterators.IInvSlot;
+import mods.railcraft.common.util.inventory.iterators.InventoryIterator;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
@@ -69,6 +69,7 @@ public class CartFilterRecipe implements IRecipe {
         FilterType filterType = null;
         int cartSlot = -1;
         int itemCount = 0;
+        int filterCartCount = 0;
         for (IInvSlot slot : InventoryIterator.getIterable(grid).notNull()) {
             itemCount++;
             ItemStack stack = slot.getStackInSlot();
@@ -77,9 +78,10 @@ public class CartFilterRecipe implements IRecipe {
                 cartSlot = slot.getIndex();
                 filterType = type;
                 cartItem = stack.copy();
+                filterCartCount++;
             }
         }
-        if (filterType == null || itemCount > 2)
+        if (filterType == null || itemCount > 2 || filterCartCount > 1)
             return null;
         for (IInvSlot slot : InventoryIterator.getIterable(grid).notNull()) {
             if (slot.getIndex() == cartSlot)
@@ -107,4 +109,17 @@ public class CartFilterRecipe implements IRecipe {
         return null;
     }
 
+    @Override
+    public ItemStack[] getRemainingItems(InventoryCrafting inv) {
+        ItemStack[] grid = new ItemStack[inv.getSizeInventory()];
+
+        for (IInvSlot slot : InventoryIterator.getIterable(inv).notNull()) {
+            ItemStack stack = slot.getStackInSlot();
+            if (FilterType.fromCartType(EnumCart.getCartType(stack)) == null) {
+                grid[slot.getIndex()] = stack.copy();
+            }
+        }
+
+        return grid;
+    }
 }

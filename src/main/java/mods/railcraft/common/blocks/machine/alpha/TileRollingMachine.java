@@ -22,8 +22,8 @@ import mods.railcraft.common.plugins.buildcraft.triggers.IHasWork;
 import mods.railcraft.common.util.crafting.RollingMachineCraftingManager;
 import mods.railcraft.common.util.inventory.*;
 import mods.railcraft.common.util.inventory.filters.ArrayStackFilter;
-import mods.railcraft.common.util.inventory.wrappers.IInvSlot;
-import mods.railcraft.common.util.inventory.wrappers.InventoryIterator;
+import mods.railcraft.common.util.inventory.iterators.IInvSlot;
+import mods.railcraft.common.util.inventory.iterators.InventoryIterator;
 import mods.railcraft.common.util.misc.Game;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -54,7 +54,7 @@ public class TileRollingMachine extends TileMachineBase implements IEnergyHandle
     private boolean isWorking, paused;
     private ItemStack currentReceipe;
     private int progress;
-    private final AdjacentInventoryCache cache = new AdjacentInventoryCache(this, tileCache, null, InventorySorter.SIZE_DECENDING);
+    private final AdjacentInventoryCache cache = new AdjacentInventoryCache(this, tileCache, null, InventorySorter.SIZE_DESCENDING);
     private final Set<IActionExternal> actions = new HashSet<IActionExternal>();
 
     private static class RollingContainer extends Container {
@@ -153,7 +153,7 @@ public class TileRollingMachine extends TileMachineBase implements IEnergyHandle
             return;
 
         if (clock % 8 == 0) {
-            currentReceipe = RollingMachineCraftingManager.getInstance().findMatchingRecipe(craftMatrix, worldObj);
+            currentReceipe = RollingMachineCraftingManager.instance().findMatchingRecipe(craftMatrix, worldObj);
             if (currentReceipe != null)
                 findMoreStuff();
         }
@@ -162,7 +162,7 @@ public class TileRollingMachine extends TileMachineBase implements IEnergyHandle
             if (progress >= PROCESS_TIME) {
                 isWorking = false;
                 if (InvTools.isRoomForStack(currentReceipe, invResult)) {
-                    currentReceipe = RollingMachineCraftingManager.getInstance().findMatchingRecipe(craftMatrix, worldObj);
+                    currentReceipe = RollingMachineCraftingManager.instance().findMatchingRecipe(craftMatrix, worldObj);
                     if (currentReceipe != null) {
                         for (int i = 0; i < craftMatrix.getSizeInventory(); i++) {
                             craftMatrix.decrStackSize(i, 1);
@@ -253,7 +253,7 @@ public class TileRollingMachine extends TileMachineBase implements IEnergyHandle
     }
 
     public boolean canMakeMore() {
-        if (RollingMachineCraftingManager.getInstance().findMatchingRecipe(craftMatrix, worldObj) == null)
+        if (RollingMachineCraftingManager.instance().findMatchingRecipe(craftMatrix, worldObj) == null)
             return false;
         if (useLast)
             return true;

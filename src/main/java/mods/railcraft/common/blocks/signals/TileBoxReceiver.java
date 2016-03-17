@@ -35,7 +35,6 @@ public class TileBoxReceiver extends TileBoxActionManager implements IAspectActi
 
     private static final int FORCED_UPDATE = 512;
     private final SimpleSignalReceiver receiver = new SimpleSignalReceiver(getLocalizationTag(), this);
-    private boolean prevBlinkState;
 
     @Override
     public EnumSignal getSignalType() {
@@ -52,14 +51,10 @@ public class TileBoxReceiver extends TileBoxActionManager implements IAspectActi
     }
 
     @Override
-    public void updateEntity() {
-        super.updateEntity();
+    public void update() {
+        super.update();
         if (Game.isNotHost(getWorld())) {
             receiver.tickClient();
-            if (receiver.getAspect().isBlinkAspect() && prevBlinkState != SignalAspect.isBlinkOn()) {
-                prevBlinkState = SignalAspect.isBlinkOn();
-                markBlockForUpdate();
-            }
             return;
         }
         receiver.tickServer();
