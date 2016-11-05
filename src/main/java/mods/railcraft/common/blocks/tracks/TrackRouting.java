@@ -75,7 +75,7 @@ public class TrackRouting extends TrackSecured implements ITrackPowered, IRoutin
         if (inv.getStackInSlot(0) == null)
             return;
         if (cart instanceof IRoutableCart) {
-          String originalDest = ((IRoutable) cart).getDestination();
+          String originalDest = ((IRoutableCart) cart).getDestination();
           ItemStack command0 = inv.getStackInSlot(0);
           String command = ItemTicket.getDestination(command0);
           if (command != null && command.startsWith("\\.")) {
@@ -126,7 +126,7 @@ public class TrackRouting extends TrackSecured implements ITrackPowered, IRoutin
     }
     
     final private List<String> stringToList(String str) {
-      Arrays.asList(str.split(","));
+      return Arrays.asList(str.split(","));
     }
     
     final private String listToString(List<String> list) {
