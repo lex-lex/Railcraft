@@ -12,6 +12,8 @@ import com.mojang.authlib.GameProfile;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+//import java.util.regex.Matcher;
+//import java.util.regex.Pattern;
 import mods.railcraft.api.core.items.IToolCrowbar;
 import mods.railcraft.api.tracks.IRoutingTrack;
 import net.minecraft.entity.item.EntityMinecart;
@@ -69,8 +71,65 @@ public class TrackRouting extends TrackSecured implements ITrackPowered, IRoutin
             return;
         if (inv.getStackInSlot(0) == null)
             return;
-        if (cart instanceof IRoutableCart)
-            ((IRoutableCart) cart).setDestination(inv.getStackInSlot(0));
+        if (cart instanceof IRoutableCart) {
+          String originalDest = ((IRoutable) cart).getDestination();
+          String command = inv.getStackInSlot(0);
+          if (str != null && command.startsWith("\\.")) {
+            String body = command.substring(2);
+            String updatedBody = interprete(body, originalDest);
+            ((IRoutableCart) cart).setDestination(updatedBody);
+          } else {
+            ((IRoutableCart) cart).setDestination(command);
+          }           
+        }
+    }
+    
+    final private String interprete(String string, String arg) {
+      StringBuilder output = new StringBuilder();
+
+      final String regex = "([a-z]+)|(\\([a-z]*\\))";
+
+      final Pattern pattern = Pattern.compile(regex);
+      final Matcher matcher = pattern.matcher(string);
+
+      while (matcher.find()) {
+        String match = matcher.group(0);
+        if (match.startsWith("(") && match.endsWith(")")) {
+          String matchWithoutParentheses = match.substring(1, match.length()-1); // drop ( and )
+          if (matchWithoutParentheses.equals("reverse")) { // call functions explicitly
+            List<String> xx = stringToList(arg);
+            output.append(listToString(Lists.reverse(xx)));
+          } else if (matchWithoutParentheses.equals("cycle")) {
+            List<String> xx = stringToList(arg);
+            if (xx.size() > 0) {  
+              String head = xx.get(0);
+              output.append(xx.subList(1,xx.size()).add(head));
+            }
+          } else if (matchWithoutParentheses.equals("tail")) {
+            List<String> xx = stringToList(arg);
+            if (xx.size() > 0) {
+              output.append(listToString(xx.subList(1,xx.size())));
+            }
+          } // if not recognized, do nothing
+        } else { // if not a (....) pattern, just write to output
+          output.append(match);
+        }
+      }
+      return output.toString();
+    }
+    
+    final private List<String> stringToList(String str) {
+      Arrays.asList(arg.split(","));
+    }
+    
+    final private String listToString(List<String> list) {
+      StringBuilder output = new StringBuilder();
+      for(String str: list) {
+        output.append(str);
+        output.append(",");
+      }
+      String preOutput = output.toString();
+      return preOutput.substring(0,preOutput.length()-1);
     }
 
     @Override
