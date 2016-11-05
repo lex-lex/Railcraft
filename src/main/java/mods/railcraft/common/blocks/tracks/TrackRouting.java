@@ -12,8 +12,11 @@ import com.mojang.authlib.GameProfile;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-//import java.util.regex.Matcher;
-//import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
 import mods.railcraft.api.core.items.IToolCrowbar;
 import mods.railcraft.api.tracks.IRoutingTrack;
 import net.minecraft.entity.item.EntityMinecart;
@@ -74,7 +77,7 @@ public class TrackRouting extends TrackSecured implements ITrackPowered, IRoutin
         if (cart instanceof IRoutableCart) {
           String originalDest = ((IRoutable) cart).getDestination();
           String command = inv.getStackInSlot(0);
-          if (str != null && command.startsWith("\\.")) {
+          if (command != null && command.startsWith("\\.")) {
             String body = command.substring(2);
             String updatedBody = interprete(body, originalDest);
             ((IRoutableCart) cart).setDestination(updatedBody);
@@ -98,7 +101,8 @@ public class TrackRouting extends TrackSecured implements ITrackPowered, IRoutin
           String matchWithoutParentheses = match.substring(1, match.length()-1); // drop ( and )
           if (matchWithoutParentheses.equals("reverse")) { // call functions explicitly
             List<String> xx = stringToList(arg);
-            output.append(listToString(Lists.reverse(xx)));
+            Collections.reverse(xx);
+            output.append(listToString(xx));
           } else if (matchWithoutParentheses.equals("cycle")) {
             List<String> xx = stringToList(arg);
             if (xx.size() > 0) {  
@@ -119,7 +123,7 @@ public class TrackRouting extends TrackSecured implements ITrackPowered, IRoutin
     }
     
     final private List<String> stringToList(String str) {
-      Arrays.asList(arg.split(","));
+      Arrays.asList(str.split(","));
     }
     
     final private String listToString(List<String> list) {
