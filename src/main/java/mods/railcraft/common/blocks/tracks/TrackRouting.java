@@ -76,13 +76,16 @@ public class TrackRouting extends TrackSecured implements ITrackPowered, IRoutin
             return;
         if (cart instanceof IRoutableCart) {
           String originalDest = ((IRoutable) cart).getDestination();
-          String command = inv.getStackInSlot(0);
+          ItemStack command0 = inv.getStackInSlot(0);
+          String command = ItemTicket.getDestination(command0);
           if (command != null && command.startsWith("\\.")) {
             String body = command.substring(2);
             String updatedBody = interprete(body, originalDest);
-            ((IRoutableCart) cart).setDestination(updatedBody);
+            ItemStack newCommand = ItemTicket.copyTicket(command0);
+            ItemTicket.setTicketData(newCommand,updatedBody, "marco" ,ItemTicket.getOwner(newCommand));
+            ((IRoutableCart) cart).setDestination(newCommand);
           } else {
-            ((IRoutableCart) cart).setDestination(command);
+            ((IRoutableCart) cart).setDestination(command0);
           }           
         }
     }
