@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import mods.railcraft.api.core.items.IToolCrowbar;
@@ -32,17 +33,19 @@ import mods.railcraft.common.util.inventory.StandaloneInventory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.world.World;
 
 public class TrackRouting extends TrackSecured implements ITrackPowered, IRoutingTrack {
 
     private StandaloneInventory inv = new StandaloneInventory(1);
     private boolean powered = false;
+    private long lastTriggered = Long.MIN_VALUE;
+    private static final long TRIGGER_DIFF = 20L;
 
     @Override
     public EnumTrack getTrackType() {
         return EnumTrack.ROUTING;
     }
-
     public IInventory getInventory() {
         return inv;
     }
@@ -70,6 +73,11 @@ public class TrackRouting extends TrackSecured implements ITrackPowered, IRoutin
 
     @Override
     public void onMinecartPass(EntityMinecart cart) {
+        World  world = cart.worldObj;
+        long currentTime = world.getTotalWorldTime();
+        if (!(currentTime >= lastTriggered + TRIGGER_DIFF || lastTriggered > currentTime))
+            return;
+            
         if (!isPowered())
             return;
         if (inv.getStackInSlot(0) == null)
@@ -77,23 +85,26 @@ public class TrackRouting extends TrackSecured implements ITrackPowered, IRoutin
         if (cart instanceof IRoutableCart) {
           String originalDest = ((IRoutableCart) cart).getDestination();
           ItemStack command0 = inv.getStackInSlot(0);
-          String command = ItemTicket.getDestination(command0);
-          if (command != null && command.startsWith("\\.")) {
-            String body = command.substring(2);
-            String updatedBody = interprete(body, originalDest);
-            ItemStack newCommand = ItemTicket.copyTicket(command0);
-            ItemTicket.setTicketData(newCommand,updatedBody, "marco" ,ItemTicket.getOwner(newCommand));
-            ((IRoutableCart) cart).setDestination(newCommand);
-          } else {
-            ((IRoutableCart) cart).setDestination(command0);
-          }           
+          if (command0 != null) {
+            String command = ItemTicket.getDestination(command0);
+            if (command.startsWith("\\.")) {
+              String body = command.substring(2);
+              String updatedBody = interprete(body, originalDest);
+              ItemStack newCommand = ItemTicket.copyTicket(command0);
+              ItemTicket.setTicketData(newCommand,updatedBody, "marco" ,ItemTicket.getOwner(newCommand));
+              ((IRoutableCart) cart).setDestination(newCommand);
+            } else {
+              ((IRoutableCart) cart).setDestination(command0);
+            }
+          }
+          lastTriggered = world.getTotalWorldTime();
         }
     }
     
     final private String interprete(String string, String arg) {
       StringBuilder output = new StringBuilder();
 
-      final String regex = "([a-z]+)|(\\([a-z]*\\))";
+      final String regex = "([a-z\\s]+)|(\\([a-z\\s]*\\))";
 
       final Pattern pattern = Pattern.compile(regex);
       final Matcher matcher = pattern.matcher(string);
@@ -110,23 +121,31 @@ public class TrackRouting extends TrackSecured implements ITrackPowered, IRoutin
             List<String> xx = stringToList(arg);
             if (xx.size() > 0) {  
               String head = xx.get(0);
-              output.append(xx.subList(1,xx.size()).add(head));
+              List<String> yy = xx.subList(1,xx.size());
+              yy.add(head);
+              output.append(listToString(yy));
             }
           } else if (matchWithoutParentheses.equals("tail")) {
             List<String> xx = stringToList(arg);
-            if (xx.size() > 0) {
+            if (xx.size() > 1) {
               output.append(listToString(xx.subList(1,xx.size())));
+            } else {
+              output.append("\\e");
             }
           } // if not recognized, do nothing
         } else { // if not a (....) pattern, just write to output
           output.append(match);
         }
       }
-      return output.toString();
+      String result = output.toString();
+      if (result.equals(""))
+        return "\\e";
+      else 
+        return result;
     }
     
     final private List<String> stringToList(String str) {
-      return Arrays.asList(str.split(","));
+       return new ArrayList<String>(Arrays.asList(str.split(",")));
     }
     
     final private String listToString(List<String> list) {
@@ -153,6 +172,7 @@ public class TrackRouting extends TrackSecured implements ITrackPowered, IRoutin
     public void writeToNBT(NBTTagCompound data) {
         super.writeToNBT(data);
         data.setBoolean("powered", powered);
+        data.setLong("lastTriggered", lastTriggered);
         inv.writeToNBT("inv", data);
     }
 
@@ -160,6 +180,7 @@ public class TrackRouting extends TrackSecured implements ITrackPowered, IRoutin
     public void readFromNBT(NBTTagCompound data) {
         super.readFromNBT(data);
         powered = data.getBoolean("powered");
+        lastTriggered = data.getLong("lastTriggered");
         inv.readFromNBT("inv", data);
     }
 
